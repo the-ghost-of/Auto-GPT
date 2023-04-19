@@ -98,21 +98,20 @@ def get_prompt() -> str:
 
     # Only add shell command to the prompt if the AI is allowed to execute it
     if cfg.execute_local_commands:
-        commands.append(
+        commands.extend(
             (
-                "Execute Shell Command, non-interactive commands only",
-                "execute_shell",
-                {"command_line": "<command_line>"},
-            ),
+                (
+                    "Execute Shell Command, non-interactive commands only",
+                    "execute_shell",
+                    {"command_line": "<command_line>"},
+                ),
+                (
+                    "Execute Shell Command Popen, non-interactive commands only",
+                    "execute_shell_popen",
+                    {"command_line": "<command_line>"},
+                ),
+            )
         )
-        commands.append(
-            (
-                "Execute Shell Command Popen, non-interactive commands only",
-                "execute_shell_popen",
-                {"command_line": "<command_line>"},
-            ),
-        )
-
     # Only add the download file command if the AI is allowed to execute it
     if cfg.allow_downloads:
         commands.append(
@@ -123,14 +122,16 @@ def get_prompt() -> str:
             ),
         )
 
-    # Add these command last.
-    commands.append(
-        ("Do Nothing", "do_nothing", {}),
+    commands.extend(
+        (
+            ("Do Nothing", "do_nothing", {}),
+            (
+                "Task Complete (Shutdown)",
+                "task_complete",
+                {"reason": "<reason>"},
+            ),
+        )
     )
-    commands.append(
-        ("Task Complete (Shutdown)", "task_complete", {"reason": "<reason>"}),
-    )
-
     # Add commands to the PromptGenerator object
     for command_label, command_name, args in commands:
         prompt_generator.add_command(command_label, command_name, args)

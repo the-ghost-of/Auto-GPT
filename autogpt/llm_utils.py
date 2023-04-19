@@ -69,15 +69,13 @@ def create_chat_completion(
     Returns:
         str: The response from the chat completion
     """
-    response = None
     num_retries = 10
     warned_user = False
     if CFG.debug_mode:
         print(
-            Fore.GREEN
-            + f"Creating chat completion with model {model}, temperature {temperature},"
-            f" max_tokens {max_tokens}" + Fore.RESET
+            f"{Fore.GREEN}Creating chat completion with model {model}, temperature {temperature}, max_tokens {max_tokens}{Fore.RESET}"
         )
+    response = None
     for attempt in range(num_retries):
         backoff = 2 ** (attempt + 2)
         try:
@@ -99,10 +97,7 @@ def create_chat_completion(
             break
         except RateLimitError:
             if CFG.debug_mode:
-                print(
-                    Fore.RED + "Error: ",
-                    f"Reached rate limit, passing..." + Fore.RESET,
-                )
+                print(f"{Fore.RED}Error: ", f"Reached rate limit, passing...{Fore.RESET}")
             if not warned_user:
                 logger.double_check(
                     f"Please double check that you have setup a {Fore.CYAN + Style.BRIGHT}PAID{Style.RESET_ALL} OpenAI API Account. "
@@ -110,24 +105,21 @@ def create_chat_completion(
                 )
                 warned_user = True
         except APIError as e:
-            if e.http_status == 502:
-                pass
-            else:
+            if e.http_status != 502:
                 raise
             if attempt == num_retries - 1:
                 raise
         if CFG.debug_mode:
             print(
-                Fore.RED + "Error: ",
-                f"API Bad gateway. Waiting {backoff} seconds..." + Fore.RESET,
+                f"{Fore.RED}Error: ",
+                f"API Bad gateway. Waiting {backoff} seconds...{Fore.RESET}",
             )
         time.sleep(backoff)
     if response is None:
         logger.typewriter_log(
             "FAILED TO GET RESPONSE FROM OPENAI",
             Fore.RED,
-            "Auto-GPT has failed to get a response from OpenAI's services. "
-            + f"Try running Auto-GPT again, and if the problem the persists try running it with `{Fore.CYAN}--debug{Fore.RESET}`.",
+            f"Auto-GPT has failed to get a response from OpenAI's services. Try running Auto-GPT again, and if the problem the persists try running it with `{Fore.CYAN}--debug{Fore.RESET}`.",
         )
         logger.double_check()
         if CFG.debug_mode:
@@ -158,15 +150,13 @@ def create_embedding_with_ada(text) -> list:
         except RateLimitError:
             pass
         except APIError as e:
-            if e.http_status == 502:
-                pass
-            else:
+            if e.http_status != 502:
                 raise
             if attempt == num_retries - 1:
                 raise
         if CFG.debug_mode:
             print(
-                Fore.RED + "Error: ",
-                f"API Bad gateway. Waiting {backoff} seconds..." + Fore.RESET,
+                f"{Fore.RED}Error: ",
+                f"API Bad gateway. Waiting {backoff} seconds...{Fore.RESET}",
             )
         time.sleep(backoff)
